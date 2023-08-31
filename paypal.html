@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <!-- Replace "test" with your own sandbox Business account app client ID -->
+    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+    <!-- Set up a container element for the button -->
+    <div id="paypal-button-container"></div>
+
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+      <input type="hidden" name="cmd" value="_s-xclick">
+      <input type="hidden" name="hosted_button_id" value="MYRAP6Y24QJ7A">
+      <table>
+      <tr><td><input type="hidden" name="on0" value="Planes">Planes</td></tr><tr><td><select name="os0">
+        <option value="Basico">Basico $2.00 USD</option>
+        <option value="Expert">Expert $4.00 USD</option>
+        <option value="Plus"></option>Plus $5.00 USD</option>
+      </select> </td></tr>
+      </table>
+      <input type="hidden" name="currency_code" value="USD">
+      <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+      <img alt="" border="0" src="https://www.paypalobjects.com/es_XC/i/scr/pixel.gif" width="1" height="1">
+      </form>
+      
+    <script>
+      paypal.Buttons({
+        // Order is created on the server and the order id is returned
+        createOrder() {
+          return fetch("/my-server/create-paypal-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            // use the "body" param to optionally pass additional order information
+            // like product skus and quantities
+            body: JSON.stringify({
+              cart: [
+                {
+                  sku: "YOUR_PRODUCT_STOCK_KEEPING_UNIT",
+                  quantity: "YOUR_PRODUCT_QUANTITY",
+                },
+              ],
+            }),
+          })
+          .then((response) => response.json())
+          .then((order) => order.id);
+        },
+        // Finalize the transaction on the server after payer approval
+        onApprove(data) {
+          return fetch("/my-server/capture-paypal-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              orderID: data.orderID
+            })
+          })
+          .then((response) => response.json())
+          .then((orderData) => {
+            // Successful capture! For dev/demo purposes:
+            console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+            const transaction = orderData.purchase_units[0].payments.captures[0];
+            alert(`Transaction ${transaction.status}: ${transaction.id}\n\nSee console for all available details`);
+            // When ready to go live, remove the alert and show a success message within this page. For example:
+            // const element = document.getElementById('paypal-button-container');
+            // element.innerHTML = '<h3>Thank you for your payment!</h3>';
+            // Or go to another URL:  window.location.href = 'thank_you.html';
+          });
+        }
+      }).render('#paypal-button-container');
+    </script>
+
+    <script>
+
+         // For a fully working example, please see:
+// https://github.com/paypal-examples/docs-examples/tree/main/standard-integration
+
+const { CLIENT_ID, APP_SECRET } = process.env;
+const baseURL = {
+    sandbox: "https://api-m.sandbox.paypal.com",
+    production: "https://api-m.paypal.com"
+};
+
+// allow json body
+app.use(express.json());
+
+// create a new order
+app.post("/create-paypal-order", async (req, res) => {
+  const order = await createOrder();
+  res.json(order);
+});
+
+// capture payment & store order information or fullfill order
+app.post("/capture-paypal-order", async (req, res) => {
+  const { orderID } = req.body;
+  const captureData = await capturePayment(orderID);
+  // TODO: store payment information such as the transaction ID
+  res.json(captureData);
+});
+
+//////////////////////
+// PayPal API helpers
+//////////////////////
+
+// use the orders api to create an order
+async function createOrder() {
+  const accessToken = await generateAccessToken();
+  const url = `${baseURL.sandbox}/v2/checkout/orders`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: {
+            currency_code: "USD",
+            value: "100.00",
+          },
+        },
+      ],
+    }),
+  });
+  const data = await response.json();
+  return data;
+}
+
+// use the orders api to capture payment for an order
+async function capturePayment(orderId) {
+  const accessToken = await generateAccessToken();
+  const url = `${baseURL.sandbox}/v2/checkout/orders/${orderId}/capture`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const data = await response.json();
+  return data;
+}
+
+// generate an access token using client id and app secret
+async function generateAccessToken() {
+  const auth = Buffer.from(CLIENT_ID + ":" + APP_SECRET).toString("base64")
+  const response = await fetch(`${baseURL.sandbox}/v1/oauth2/token`, {
+    method: "POST",
+    body: "grant_type=client_credentials",
+    headers: {
+      Authorization: `Basic ${auth}`,
+    },
+  });
+  const data = await response.json();
+  return data.access_token;
+}
+
+    </script>
+  </body>
+</html>

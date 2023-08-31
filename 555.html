@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>ejemplo de jQuery Get</title>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+</head>
+<body>
+ 
+<form id="formulario">
+  <input type="text" name="usuario" placeholder="Ingresa el nombre de usuario de gitHub">
+  <input type="submit" value="Buscar">
+</form>
+<!-- el resultado de la busqueda será mostrado dentro de éste div -->
+<div id="resultado"></div>
+ 
+<script>
+// Une un controlador de submit(de entrega) al formulario
+$( "#formulario" ).submit(function( evento ) {
+ 
+  // Evita que el formulario se entregue normalmente
+  evento.preventDefault();
+ 
+  // Obten algunos valores de elementos en la página:
+
+    
+
+  $.ajax({
+    type: "POST",
+    url:"querysPDO.php",
+    data:{
+
+        type:"getEnterprises",
+        busqued:1    
+
+
+    },
+    success: function(respuesta){
+        //si la solicitud es hecha éxitosamente entonces la respuesta representa los datos
+           
+        $( "#resultado" ).empty().append(respuesta);
+        var namelistB = [];
+
+        namelistB =respuesta.Producto;
+        const obj = JSON.parse(respuesta);
+      
+        alert(obj.length);
+        
+
+    }
+  });
+  
+});
+
+
+
+
+</script>
+ 
+</body>
+</html>

@@ -1,0 +1,104 @@
+
+.formulario{
+    
+    
+    position: relative;
+    background-color:aqua;
+    width:40%;
+    height:400px;
+    border-radius:12px;
+    display:block;
+    padding:30px;
+    margin-left:30%;
+    margin-bottom:4px;
+    
+  }
+    
+  .formulario2{
+    
+    
+    position: relative;
+    background-color:rgb(138, 196, 196);
+    width:40%;
+    height:400px;
+    border-radius:12px;
+    display:block;
+    padding:30px;
+    margin-left:30%;
+    margin-bottom:4px;
+    
+  }
+  .cardIR{
+      display:none;
+    }
+
+    .cardIResul{
+      display:none;
+    } 
+
+
+    .Diss{
+
+          color: red;
+          font-style: oblique;
+          font-size:14px;
+
+
+    }
+    
+
+
+
+  
+@media screen and (max-width: 600px) {
+   
+
+    .tableResul{
+      display:none;
+    }
+
+    .tableR{
+      display:none;
+    }
+    .cardIR{
+      display:block;
+      
+   
+    }
+
+    .cardIResul{
+      display:block;
+    } 
+
+
+    span{
+
+      font-family: "Lucida Console", "Courier New", monospace;
+      font-size:16px;
+    }
+
+    h3{
+
+      font-weight: 900;
+      font-size:16px;
+      color:gray;
+
+    }
+    body{
+
+
+      padding: 20px;
+
+      margin-left:30px;    
+    }
+    .centrado{
+      display:flex;
+      justify-content: center;
+      margin-top:10px;
+
+    }
+
+   
+
+
+}
